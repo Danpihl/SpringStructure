@@ -167,20 +167,24 @@ void SpringStructure::update() {
     idx_0 = k;
     idx_1 = N + k;
     idx_2 = 2*N + k;
-    A[idx_0] = (A[idx_0] - Ca*V[idx_0] - C*Vp[idx_0])/m;
-    A[idx_1] = (A[idx_1] - Ca*V[idx_1] - C*Vp[idx_1])/m;
-    A[idx_2] = (A[idx_2] - Ca*V[idx_2] - C*Vp[idx_2])/m;
 
-    A[idx_1] = A[idx_1] - g;
+    if(k != (N-1)) {
 
-    V[idx_0] = V[idx_0] + h*A[idx_0];
-    V[idx_1] = V[idx_1] + h*A[idx_1];
-    V[idx_2] = V[idx_2] + h*A[idx_2];
+      A[idx_0] = (A[idx_0] - Ca*V[idx_0] - C*Vp[idx_0])/m;
+      A[idx_1] = (A[idx_1] - Ca*V[idx_1] - C*Vp[idx_1])/m;
+      A[idx_2] = (A[idx_2] - Ca*V[idx_2] - C*Vp[idx_2])/m;
 
-    P[idx_0] = P[idx_0] + h*V[idx_0];
-    P[idx_1] = P[idx_1] + h*V[idx_1];
-    P[idx_2] = P[idx_2] + h*V[idx_2];
+      A[idx_1] = A[idx_1] - g;
 
+      V[idx_0] = V[idx_0] + h*A[idx_0];
+      V[idx_1] = V[idx_1] + h*A[idx_1];
+      V[idx_2] = V[idx_2] + h*A[idx_2];
+
+      P[idx_0] = P[idx_0] + h*V[idx_0];
+      P[idx_1] = P[idx_1] + h*V[idx_1];
+      P[idx_2] = P[idx_2] + h*V[idx_2];
+
+    }
     // Floor
     if(P[idx_1] < 0.0f) {
       P[idx_1] = 0.0f;
@@ -218,10 +222,11 @@ void SpringStructure::set_velocity(float dir[3], float amp) {
   dir[2] = amp*dir[2]/r_;
 
   for(int c_ = 0; c_ < N; c_++) {
-
-    V[c_]       = V[c_] + dir[0];
-    V[N + c_]   = V[N + c_] + dir[1];
-    V[2*N + c_] = V[2*N + c_] + dir[2];
+    if(c_ != (N-1)) {
+      V[c_]       = V[c_] + dir[0];
+      V[N + c_]   = V[N + c_] + dir[1];
+      V[2*N + c_] = V[2*N + c_] + dir[2];
+    }
 
   }
 

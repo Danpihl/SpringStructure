@@ -8,7 +8,7 @@ find_package(GLUT REQUIRED)
 
 include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
 
-set(WORK_DIR /Users/danielpihlquist/programming_projects/spring_structure/)
+set(WORK_DIR /Users/danielpihlquist/programming_projects/SpringStructure/)
 
 set (CMAKE_SKIP_RULE_DEPENDENCY TRUE)
 set (CMAKE_CXX_STANDARD 11)

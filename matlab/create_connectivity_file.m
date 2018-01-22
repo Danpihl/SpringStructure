@@ -4,10 +4,6 @@ fid = fopen(fname, 'w+');
 
 for k = 1:N
     
-    if k == N
-        aaa = 1;
-    end
-    
     % Number of points
     n = rc(k, 1);
     % Connected indices

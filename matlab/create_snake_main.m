@@ -27,6 +27,8 @@ Y = [Y, zeros(1, Np)];
 Z = [Z, (0:(Np-1))*dz];
 N = size(X, 2);
 
+center_idxs = (size(xc, 2)*Np+1):N;
+not_center_idxs = 1:(size(xc, 2)*Np);
 
 rc = cell(N, 1);
 max_length = 0;
@@ -40,26 +42,35 @@ for k = 1:N
     [s, sidx] = sort(d);
     s = s(2:end);
     sidx = sidx(2:end);
-
+    
     connidx = sidx(s < 1.01);
-
+    
     rc{k} = [rc{k}, connidx];
+%     figure(1); clf; hold on; grid on;
+%     scatter3(X, Y, Z)
+%     scatter3(X(k), Y(k), Z(k), 'r')
+%     axis equal
+%     xlabel('x');
+%     ylabel('y');
+%     zlabel('z');
+    
+    aa = 1;
     
     if (abs(X(k)) < 0.01) && (abs(Y(k)) < 0.01) % Center
         
         
         aa = 1;
-%         rc{k} = [rc{k}, connidx];
-%         R = [X(k) - X;
-%              Y(k) - Y;
-%              Z(k) - Z];
-%         d = sum(R.*R, 1);
-%         [s, sidx] = sort(d);
-%         s = s(2:end);
-%         sidx = sidx(2:end);
+
         
     else  % Not center
         aa = 1;
+        
+        cid = [];
+        for a = 1:length(center_idxs)
+            
+            
+        end
+        
         
     end
     

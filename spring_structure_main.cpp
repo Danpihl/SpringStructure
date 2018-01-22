@@ -48,7 +48,7 @@ SpringStructure ss;
 int img_idx = 0;
 cv::Mat img;
 
-std::string base_path("/Users/danielpihlquist/programming_projects/spring_structure/matlab/");
+std::string base_path("/Users/danielpihlquist/programming_projects/SpringStructure/matlab/");
 
 std::string conn_file_name("");
 std::string pos_file_name("");
@@ -69,15 +69,21 @@ int main(int argc, char **argv) {
   //conn_file_name = base_path + "conn_lattice.txt";
   //pos_file_name = base_path + "pos_lattice.txt";
 
-  conn_file_name = base_path + "conn_snake.txt";
-  pos_file_name = base_path + "pos_snake.txt";
+  //conn_file_name = base_path + "conn_snake.txt";
+  //pos_file_name = base_path + "pos_snake.txt";
+
+  //conn_file_name = base_path + "conn_wheel.txt";
+  //pos_file_name = base_path + "pos_wheel.txt";
+
+  conn_file_name = base_path + "conn_ball_chain.txt";
+  pos_file_name = base_path + "pos_ball_chain.txt";
 
   // Simulation parameters:
   float c = 3.0f;     // Exterior dampening
-  float ca = 0.0f;      // Air resistance
+  float ca = 1.0f;      // Air resistance
   float m = 1.0f;       // Exterior mass
   float x0 = 0.0f;
-  float y0 = 1.0f;
+  float y0 = 14.0f;
   float z0 = 0.0f;
   float K = 100000.0f;  // Exterior spring constant
   float h = 0.001f;     // Time step
