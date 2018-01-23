@@ -168,7 +168,7 @@ void SpringStructure::update() {
     idx_1 = N + k;
     idx_2 = 2*N + k;
 
-    if(k != (N-1)) {
+    //if(k != (N-1)) {
 
       A[idx_0] = (A[idx_0] - Ca*V[idx_0] - C*Vp[idx_0])/m;
       A[idx_1] = (A[idx_1] - Ca*V[idx_1] - C*Vp[idx_1])/m;
@@ -184,14 +184,14 @@ void SpringStructure::update() {
       P[idx_1] = P[idx_1] + h*V[idx_1];
       P[idx_2] = P[idx_2] + h*V[idx_2];
 
-    }
+    //}
     // Floor
     if(P[idx_1] < 0.0f) {
       P[idx_1] = 0.0f;
       V[idx_1] = -V[idx_1];
     }
 
-    #define room_limit 10.0f
+    #define room_limit 15.0f
 
     if(P[idx_0] < -room_limit) {
       P[idx_0] = -room_limit;
@@ -211,6 +211,20 @@ void SpringStructure::update() {
     }
   }
 
+
+}
+
+void SpringStructure::reset_structure(void) {
+
+  for(int c_ = 0; c_ < N; c_++) {
+    V[c_]       = 0.0f;
+    V[N + c_]   = 0.0f;
+    V[2*N + c_] = 0.0f;
+    P[c_] = iP[c_];
+    P[N + c_] = iP[N + c_];
+    P[2*N + c_] = iP[2*N + c_];
+
+  }
 
 }
 
@@ -330,10 +344,10 @@ void SpringStructure::calculate_edges(int *conn) {
     if(p2e_idx[k].size() > max_connections)
       max_connections = p2e_idx[k].size();
 
-    for(int i = 0; i < p2e_idx[k].size(); i++) {
+    /*for(int i = 0; i < p2e_idx[k].size(); i++) {
       cout << p2e_idx[k][i] << ":";
     }
-    cout << endl;
+    cout << endl;*/
   }
 
   point_to_edge_index = (int*)malloc(sizeof(int)*N*max_connections);
@@ -383,10 +397,11 @@ SpringStructure::SpringStructure(std::string conn_file_name, std::string pos_fil
   }
   calculate_edges(conn);
 
-  //calculate_edges(conn);
+  
 
   std::vector< vector<float> > positions = read_positions(pos_file_name);
   this->P = (float*)malloc(sizeof(float)*3*N);
+  this->iP = (float*)malloc(sizeof(float)*3*N);
   this->V = (float*)calloc(3*N, sizeof(float));
   this->A = (float*)malloc(sizeof(float)*3*N);
 
@@ -399,7 +414,7 @@ SpringStructure::SpringStructure(std::string conn_file_name, std::string pos_fil
     P[k] = positions[k][0];
     P[N + k] = positions[k][1];
     P[2*N + k] = positions[k][2];
-
+    
   }
 
   Rs = (float*)malloc(sizeof(float)*Ne);
@@ -415,6 +430,10 @@ SpringStructure::SpringStructure(std::string conn_file_name, std::string pos_fil
     P[N + k] = P[N + k] + y0;
     P[2*N + k] = P[2*N + k] + z0;
     
+    iP[k] = P[k];
+    iP[N + k] = P[N + k];
+    iP[2*N + k] = P[2*N + k];
+
     V[k] = 0.0f;
     V[N + k] = 0.0f;
     V[2*N + k] = 0.0f;

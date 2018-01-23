@@ -1,7 +1,7 @@
 clc, clear
 
-Nz = 3;   % Number of layers
-Nx = 3;
+Nz = 10;   % Number of layers
+Nx = 10;
 Ny = 10;
 
 l = 0.5;
@@ -45,6 +45,42 @@ for k = 1:Nz
     
 end
 
+mx = max(Pxf);
+my = max(Pyf);
+mz = max(Pzf);
+
+dg = 0.2;
+
+mlx = mx/2 - mx*dg;
+mux = mx/2 + mx*dg;
+
+mly = my/2 - my*dg;
+muy = my/2 + my*dg;
+
+mlz = mz/2 - mz*dg;
+muz = mz/2 + mz*dg;
+
+idxs = ((Pxf > mlx) & (Pxf < mux)) & ...
+       ((Pyf > mly) & (Pyf < muy));
+
+idxs = idxs | ((Pxf > mlx) & (Pxf < mux)) & ...
+              ((Pzf > mlz) & (Pzf < muz));
+idxs = idxs | ((Pyf > mly) & (Pyf < muy)) & ...
+              ((Pzf > mlz) & (Pzf < muz));
+% Pxf((Pxf > mlx) & (Pxf < mux)) = [];
+% Pyf((Pyf > mly) & (Pyf < muy)) = [];
+% Pzf((Pzf > mlz) & (Pzf < muz)) = [];
+Pxf(idxs) = [];
+Pyf(idxs) = [];
+Pzf(idxs) = [];
+
+figure(1); clf; hold on; grid on;
+scatter3(Pxf, Pyf, Pzf);
+% scatter(Pyf, Pzf);
+
+
+
+%%
 
 a = 0.2;
 

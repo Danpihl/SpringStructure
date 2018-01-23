@@ -11,6 +11,10 @@ float x=0.0f;
 float z=5.0f;
 float deltaAngle = 0.0f;
 float deltaMove = 0;
+float dy = 0.0f;
+float Y = 0.0f;
+float de_ = 0.0f;
+float E = 0.0f;
 
 void draw_world(int world_edge) {
 
@@ -19,21 +23,23 @@ void draw_world(int world_edge) {
 		computePos(deltaMove);
 	if (deltaAngle)
 		computeDir(deltaAngle);
-
+  if(dy)
+    Y = Y + dy;
 	// Clear Color and Depth Buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	gluLookAt(x, 1.0f, z,
+	/*gluLookAt(x, 1.0f, z,
+				    x+lx, 1.0f+Y,  z+lz,
+				    0.0f, 1.0f,  0.0f);*/
+  gluLookAt(x, 1.0f, z,
 				    x+lx, 1.0f,  z+lz,
 				    0.0f, 1.0f,  0.0f);
   //gluLookAt(camera.x, camera.y, camera.z,  lookat.x, lookat.y, lookat.z, 0, 1, 0)
   
   // Draw ground
-  
-	
 	glBegin(GL_QUADS);
     glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex3f(-world_edge, 0.0f, -world_edge);
@@ -43,21 +49,6 @@ void draw_world(int world_edge) {
 		glVertex3f( world_edge, 0.0f, -world_edge);
 	glEnd();
 
-  glColor3f(1.0f, 0.0f, 0.0f);
-  glLineWidth(2.5); 
-  glBegin(GL_LINES);
-    glVertex3f(-10.0f, 0.02f, -10.0f);
-    glVertex3f(10.0f, 0.02f, -10.0f);
-    glVertex3f(10.0f, 0.02f, 10.0f);
-    glVertex3f(-10.0f, 0.02f, 10.0f);
-    glVertex3f(-10.0f, 0.02f, -10.0f);
-
-    glVertex3f(-10.0f, 0.02f, -10.0f);
-    glVertex3f(-10.0f, 0.02f, 10.0f);
-    glVertex3f(10.0f, 0.02f, 10.0f);
-    glVertex3f(10.0f, 0.02f, -10.0f);
-    glVertex3f(-10.0f, 0.02f, -10.0f);
-  glEnd();
 }
 
 void pressKey(int key, int xx, int yy) {
@@ -67,6 +58,7 @@ void pressKey(int key, int xx, int yy) {
 		case GLUT_KEY_RIGHT : deltaAngle = 0.05f; break;
 		case GLUT_KEY_UP : deltaMove = 1.5f; break;
 		case GLUT_KEY_DOWN : deltaMove = -1.5f; break;
+    
 	}
   
 

@@ -14,6 +14,7 @@ public:
   float g;
   float h;
 
+  float *iP;
   float *P;
   float *V;
   float *A;
@@ -78,6 +79,7 @@ public:
                                  float h_, float C_, float K_, float m_, float Ca_,
                                  float x0, float y0, float z0);
   void print_connectivity_graph(int *conn);
+  void reset_structure(void);
   SpringStructure();
 
 };

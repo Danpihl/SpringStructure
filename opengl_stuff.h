@@ -8,6 +8,7 @@ extern float x;
 extern float z;
 extern float deltaAngle;
 extern float deltaMove;
+extern int xOrigin;
 
 void pressKey(int key, int xx, int yy);
 void releaseKey(int key, int x, int y);
@@ -15,5 +16,9 @@ void computeDir(float deltaAngle);
 void computePos(float deltaMove);
 void changeSize(int w, int h);
 void draw_world(int world_edge);
+extern float dy;
+extern float Y;
+extern float de_;
+extern float E;
 
 #endif

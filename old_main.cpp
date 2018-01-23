@@ -16,13 +16,7 @@
 #include <OpenGl/glu.h>
 #include <GLUT/glut.h>
 
-#define ILUT_USE_OPENGL
 #include <IL/il.h>
-#include <IL/ilut.h>
-#include <IL/ilu.h>
-#include <IL/ilu_region.h>
-#include <IL/ilut_config.h>
-#include <IL/devil_internal_exports.h>
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -35,17 +29,21 @@
 #include "SpringStructure.h"
 #include "opengl_stuff.h"
 
+#define DEFAULT_WIDTH  640
+#define DEFAULT_HEIGHT 480
+ 
+int width  = DEFAULT_WIDTH;
+int height = DEFAULT_HEIGHT;
+
 void processNormalKeys(unsigned char key, int x, int y);
 void processNormalKeysRelease(unsigned char key, int x, int y);
 void processSpecialKeys(int key, int x, int y);
 
 void renderScene(void);
 void draw_icosphere();
+int LoadImage(char *filename);
 
 using namespace std;
-
-GLuint texture[1];
-ILuint imageID[1];
 
 string record_string;
 string write_string;
@@ -64,12 +62,12 @@ std::string pos_file_name("");
 std::vector<SpringStructure> structures;
 
 int main(int argc, char **argv) {
+  
+  //conn_file_name = base_path + "conn_rand.txt";
+  //pos_file_name = base_path + "pos_rand.txt";
 
   //conn_file_name = base_path + "conn_sphere_163.txt";
   //pos_file_name = base_path + "pos_sphere_163.txt";
-
-  //conn_file_name = base_path + "conn_rand.txt";
-  //pos_file_name = base_path + "pos_rand.txt";
 
   //conn_file_name = base_path + "conn_cube_125.txt";
   //pos_file_name = base_path + "pos_cube_125.txt";
@@ -87,11 +85,11 @@ int main(int argc, char **argv) {
   //pos_file_name = base_path + "pos_ball_chain.txt";
 
   // Simulation parameters:
-  float c = 4.0f;     // Exterior dampening
-  float ca = 0.1f;      // Air resistance
-  float m = 0.5f;       // Exterior mass
+  float c = 3.0f;     // Exterior dampening
+  float ca = 0.0f;      // Air resistance
+  float m = 1.0f;       // Exterior mass
   float x0 = 0.0f;
-  float y0 = 5.0f;
+  float y0 = 14.0f;
   float z0 = 0.0f;
   float K = 100000.0f;  // Exterior spring constant
   float h = 0.001f;     // Time step
@@ -120,17 +118,32 @@ int main(int argc, char **argv) {
 	glutSpecialUpFunc(releaseKey);
   glutKeyboardFunc(processNormalKeys);
   glutKeyboardUpFunc(processNormalKeysRelease);
-  glEnable(GL_SMOOTH);		// Enable (gouraud) shading
-	glEnable(GL_DEPTH_TEST);	// Enable the depth testing
-	glDepthFunc(GL_LEQUAL);		// Set our depth function to overwrite if new value less than or equal to current value
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Ask for nicest perspective correction
-	glEnable(GL_TEXTURE_2D);	// Enable 2D textures
+  
+	// OpenGL init
+	glEnable(GL_DEPTH_TEST);
 
   glPixelStorei(GL_PACK_ALIGNMENT, (img.step & 3) ? 1 : 4);
 
   //set length of one complete row in destination data (doesn't need to equal img.cols)
   glPixelStorei(GL_PACK_ROW_LENGTH, img.step/img.elemSize());
   glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+  ilInit();
+  GLuint texid;
+  ILuint image = LoadImage("../floor2.jpg");
+  if ( image == -1 )
+  {
+      cout << "Can't load picture file by DevIL \n";
+      return -1;
+  }
+
+  
+  /*glGenTextures(1, &texid);
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 
+  0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); */
 
 	// enter GLUT event processing cycle
 	glutMainLoop();
@@ -144,9 +157,7 @@ void processNormalKeysRelease(unsigned char key, int x, int y) {
   if((key == 'i') || (key == 'k')) {
     dy = 0.0f;
   }
-  if((key == 'o') || (key == 'l')) {
-    de_ = 0.0f;
-  }
+  
 }
 
 void processNormalKeys(unsigned char key, int x, int y) {
@@ -160,7 +171,9 @@ void processNormalKeys(unsigned char key, int x, int y) {
     
   }
   else if(key == 'r') {
-    is_recording = !is_recording;
+    ss.update();
+    //start_record();
+    
   }
   else if(key == 'w') {
     float v0[3];
@@ -185,8 +198,8 @@ void processNormalKeys(unsigned char key, int x, int y) {
   }
   else if(key == 'd') {
     float v0[3];
-    v0[0] = 0.0f;
-    v0[1] = 3.0f;
+    v0[0] = 3.0f;
+    v0[1] = 0.0f;
     v0[2] = 1.0f;
     ss.set_velocity(v0, 20.0f);
   }
@@ -195,22 +208,11 @@ void processNormalKeys(unsigned char key, int x, int y) {
      ss.reset_structure();
   }
   else if(key == 'i') {
-    dy = dy - 0.1f;
+    dy = dy + 0.01f;
   }
   else if(key == 'k') {
-    dy = dy + 0.1f;
+    dy = dy - 0.01f;
   }
-  else if(key == 'o') {
-    de_ = de_ + 0.01f;
-  }
-  else if(key == 'l') {
-    de_ = de_ - 0.01f;
-  }
-  else if(key == 'u') {
-    for(int rr = 0; rr < 10; rr++)
-      ss.update();
-  }
-  
 }
 
 void draw_icosphere() {
@@ -222,8 +224,8 @@ void draw_icosphere() {
     ss.update();
 
   glColor3f(0.3f, 0.5f, 0.75f);
-  //glColor3f(1.0f, 0.5f, 0.25f);
 
+  //glColor3f(1.0f, 0.5f, 0.25f);
   for(k = 0; k < ss.N; k++) {
     glPushMatrix();
     glTranslatef(ss.P[k], ss.P[ss.N+k], 0.0f + ss.P[2*ss.N+k]);
@@ -238,17 +240,20 @@ void draw_icosphere() {
   for(k = 0; k < ss.N; k++) {
     
     lim_ = ss.conn[k*ss.max_length];
-  
-    for(i = 1; i < lim_+1; i++) {
-      cidx = ss.conn[k*ss.max_length + i];
-      glBegin(GL_LINES);
+    if(lim_ < 20) {
+      for(i = 1; i < lim_+1; i++) {
+        cidx = ss.conn[k*ss.max_length + i];
+        if(cidx != 162) {
+          glBegin(GL_LINES);
 
-      glVertex3f(ss.P[k], ss.P[ss.N+k], ss.P[2*ss.N+k]);
-      glVertex3f(ss.P[cidx], ss.P[ss.N+cidx], ss.P[2*ss.N+cidx]);
+          glVertex3f(ss.P[k], ss.P[ss.N+k], ss.P[2*ss.N+k]);
+          glVertex3f(ss.P[cidx], ss.P[ss.N+cidx], ss.P[2*ss.N+cidx]);
 
-      glEnd();
-      
+          glEnd();
+        }
+      }
     }
+
   }
   
 }
@@ -257,62 +262,22 @@ void draw_icosphere() {
 
 void renderScene(void) {
 
-  if (deltaMove)
-		computePos(deltaMove);
-	if (deltaAngle)
-		computeDir(deltaAngle);
-  if(dy)
-    Y = Y + dy;
-  if(de_)
-    E = E + de_;
-  
-  // Clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  #define world_edge 20.0f
+  draw_world(world_edge);
 
-	// Reset the matrix
-	glMatrixMode(GL_MODELVIEW);
-	
-  #define world_edge 15.0f
-
-	// Clear Color and Depth Buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Reset transformations
-	glLoadIdentity();
-  glTranslatef(0.0, Y, 0.0);
-	// Set the camera
-  gluLookAt(x, 1.0f, z,
-				    x+lx, 1.0f+E,  z+lz,
-				    0.0f, 1.0f,  0.0f);
-  //gluLookAt(camera.x, camera.y, camera.z,  lookat.x, lookat.y, lookat.z, 0, 1, 0)
-  
-  // Draw ground
-	glBegin(GL_QUADS);
-    glColor3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(-world_edge, 0.0f, -world_edge);
-		glVertex3f(-world_edge, 0.0f,  world_edge);
-    glColor3f(0.0f, 1.0f, 0.0f);
-		glVertex3f( world_edge, 0.0f,  world_edge);
-		glVertex3f( world_edge, 0.0f, -world_edge);
-	glEnd();
-
-  //glPushMatrix();
-  //glTranslatef(0.0, Y, 0.0);
+  glPushMatrix();
+  glTranslatef(0.0, 0.0, 0.0);
 
   draw_icosphere();
-  //glPopMatrix();
+  glPopMatrix();
+  
+  glutSwapBuffers();
 
-	
-	// ----- Stop Drawing Stuff! ------
-
-	glutSwapBuffers(); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
-
-
-  if(is_recording) {
+  /*if(is_recording) {
     glReadPixels(0, 0, img.cols, img.rows, GL_BGR, GL_UNSIGNED_BYTE, img.data);
-    cv::imwrite("/Users/danielpihlquist/programming_projects/SpringStructure/images/curr/image_" + to_string(img_idx) + ".png", img);
+    cv::imwrite("/Users/danielpihlquist/programming_projects/bouncy_ball/images/from_simulation/image_" + to_string(img_idx) + ".png", img);
     img_idx = img_idx + 1;
-  }
+  }*/
 
   //int w_ = glutGet(GLUT_WINDOW_WIDTH);
   //int h_ = glutGet(GLUT_WINDOW_HEIGHT);
@@ -320,4 +285,29 @@ void renderScene(void) {
   //cout << "Width: " << w_ << ", height: " << h_ << endl;
 
   
+}
+
+int LoadImage(char *filename)
+{
+    ILboolean success; 
+     ILuint image; 
+ 
+    ilGenImages(1, &image); /* Generation of one image name */
+     ilBindImage(image); /* Binding of image name */
+     success = ilLoadImage(filename); /* Loading of the image filename by DevIL */
+ 
+    if (success) /* If no error occured: */
+    {
+        /* Convert every colour component into unsigned byte. If your image contains alpha channel you can replace IL_RGB with IL_RGBA */
+           success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE); 
+ 
+        if (!success)
+           {
+                 return -1;
+           }
+    }
+    else
+        return -1;
+ 
+    return image;
 }
